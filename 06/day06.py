@@ -21,14 +21,17 @@ def count_fish(p):
     return p.size
 
 
+def simulate_n_days(p, n_days):
+    for i in range(n_days):
+        n = count_fish(p)
+        print(f'Day {i:02d}: {n} fish')
+        p = simulate_day(p)
+    final_n = count_fish(p)
+    print(f'Final population: {final_n}')
+    return final_n
+
+
 population = np.loadtxt('input.txt', delimiter=',', dtype=int)
 # population = np.array([3, 4, 3, 1, 2], dtype=int)
 
-for i in range(256):
-    n = count_fish(population)
-    print(f'Day {i:02d}: {n} fish')
-    # print(population)
-    population = simulate_day(population)
-
-final_n = count_fish(population)
-print(f'Final population: {final_n}')
+simulate_n_days(population, 80)
