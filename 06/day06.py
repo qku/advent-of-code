@@ -1,24 +1,33 @@
 import numpy as np
 
 
+def initial_population(f):
+    p = np.loadtxt(f, delimiter=',', dtype=np.uint64)
+    compact_p = np.zeros(9, dtype=np.uint64)
+
+    for i in np.unique(p):
+        n = (p == i).sum()
+        compact_p[i] = n
+
+    return compact_p
+
+
 def simulate_day(p):
-    # identify who is ready
-    ready_to_spawn = (p == 0)
+    # identify how many new to spawn
+    ready_to_spawn = p[0]
 
-    # decrease counter for rest
-    p -= 1
+    # do an iteration (move 8 to 7 etc.)
+    # and by rolling 0 -> 8 spawn new fish
+    p = np.roll(p, -1)
 
-    # reset those that are ready
-    p[ready_to_spawn] = 6
+    # re-add the fish who just had offspring
+    p[6] += ready_to_spawn
 
-    # add new fish
-    new = np.full(ready_to_spawn.sum(), 8, dtype=int)
-    p = np.append(p, new)
     return p
 
 
 def count_fish(p):
-    return p.size
+    return p.sum()
 
 
 def simulate_n_days(p, n_days):
@@ -31,7 +40,5 @@ def simulate_n_days(p, n_days):
     return final_n
 
 
-population = np.loadtxt('input.txt', delimiter=',', dtype=int)
-# population = np.array([3, 4, 3, 1, 2], dtype=int)
-
-simulate_n_days(population, 80)
+population = initial_population('input.txt')
+simulate_n_days(population, 256)
