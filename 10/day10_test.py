@@ -9,3 +9,6 @@ def test_first_illegal():
 
 def test_score():
     assert score_syntax_error('test_input.txt') == 26397
+
+def test_auto_score():
+    assert autocomplete('test_input.txt') == 288957
