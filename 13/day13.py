@@ -1,3 +1,4 @@
+import io
 import numpy as np
 
 
@@ -44,5 +45,27 @@ def count_after_first_fold(f):
     return np.count_nonzero(paper_folded)
 
 
+def print_paper(paper):
+    bio = io.BytesIO()
+    paper[paper > 0] = 1
+    np.savetxt(bio, paper, delimiter='', fmt='%1i')
+    print_string = bio.getvalue().decode('utf-8')
+    print_string = print_string.replace('0', ' ')
+    print_string = print_string.replace('1', '#')
+    print(print_string)
+
+
+def print_after_all_folds(f):
+    dots, instructions = load_input(f)
+    paper = get_paper(dots)
+
+    for axis, crease in instructions:
+        paper = do_fold(paper, axis, crease)
+
+    print_paper(paper)
+
+
 n = count_after_first_fold('input.txt')
 print(f'Dots after first fold: {n}')
+
+print_after_all_folds('input.txt')
