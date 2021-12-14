@@ -14,3 +14,7 @@ def test_step():
 
 def test_part1():
     assert diff_after_n_steps('test_input.txt', 10) == 1588
+
+
+def test_part1_pc():
+    assert diff_after_n_steps_pc('test_input.txt', 10) == 1588
