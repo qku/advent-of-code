@@ -48,47 +48,43 @@ def lowest_risk_dijkstra(f, n_expand=1, use_heuristics=False):
         b[i, 0] = i
     heuristic_distance = np.flip(b)
 
-    unvisited = np.ones_like(risk).astype(bool)
-
     distance = np.full_like(risk, np.inf)
     distance[0, 0] = 0
 
     # mark initial node as current
     current = (0, 0)
+    open_set = [current]
 
-    while unvisited[-1, -1]:
+    while True:
         # loop through unvisited neighbors
         for n in neighbors(current, max_i=max_i):
-            if unvisited[n]:
-                # set new distance value if lower than previous
-                distance[n] = np.minimum(distance[n], distance[current] + risk[n])
+            # set new distance value if lower than previous
+            new_distance = distance[current] + risk[n]
+            if new_distance < distance[n]:
+                distance[n] = new_distance
+                if n not in open_set:
+                    open_set.append(n)
 
         # set current node to visited
-        unvisited[current] = False
-        if not unvisited.any():
-            continue
+        open_set.remove(current)
+        if not open_set:
+            break
 
-        # status update
-        n_unvisited = unvisited.sum()
-        frac = 1 - (n_unvisited / unvisited.size)
-        # print(f'{frac:.2%}')
-        print(distance[unvisited].min())
-
-        # set node with the lowest distance to current
-        unvisited_i = np.argwhere(unvisited)
+        # choose new current node according to distance
         if use_heuristics:
-            mod_distance = distance + heuristic_distance
-            current = tuple(unvisited_i[mod_distance[unvisited].argmin()])
-
+            distances_open_set = [distance[i] + heuristic_distance[i] for i in open_set]
         else:
-            current = tuple(unvisited_i[distance[unvisited].argmin()])
+            distances_open_set = [distance[i] for i in open_set]
+
+        current = open_set[np.argmin(distances_open_set)]
+        print(current)
 
     return distance[-1, -1]
 
 
 if __name__ == '__main__':
-    lowest = lowest_risk_dijkstra('input.txt', use_heuristics=True)
-    lowest_exp = lowest_risk_dijkstra('input.txt', n_expand=5, use_heuristics=True)
+    # lowest = lowest_risk_dijkstra('input.txt', use_heuristics=True)
+    lowest_exp = lowest_risk_dijkstra('input.txt', n_expand=5, use_heuristics=False)
 
-    print(f'Lowest total risk: {lowest}')
+    # print(f'Lowest total risk: {lowest}')
     print(f'Lowest total risk after expansion: {lowest_exp}')
