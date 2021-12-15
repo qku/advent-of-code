@@ -35,12 +35,18 @@ def neighbors(index, max_i):
     return [i for i in pot_n if max(i) < max_i and min(i) >= 0]
 
 
-def lowest_risk_dijkstra(f, n_expand=1):
+def lowest_risk_dijkstra(f, n_expand=1, use_heuristics=False):
     risk = read_map(f)
     if n_expand > 1:
         risk = expand(risk, n_expand)
 
     max_i = risk.shape[0]
+    a = np.arange(max_i)
+    b = np.zeros_like(risk)
+    for i in range(max_i):
+        b[i] = a + i
+        b[i, 0] = i
+    heuristic_distance = np.flip(b)
 
     unvisited = np.ones_like(risk).astype(bool)
 
@@ -51,8 +57,6 @@ def lowest_risk_dijkstra(f, n_expand=1):
     current = (0, 0)
 
     while unvisited[-1, -1]:
-        #print(current)
-        #print(distance[current])
         # loop through unvisited neighbors
         for n in neighbors(current, max_i=max_i):
             if unvisited[n]:
@@ -67,18 +71,24 @@ def lowest_risk_dijkstra(f, n_expand=1):
         # status update
         n_unvisited = unvisited.sum()
         frac = 1 - (n_unvisited / unvisited.size)
-        print(f'{frac:.2%}')
+        # print(f'{frac:.2%}')
+        print(distance[unvisited].min())
 
         # set node with the lowest distance to current
         unvisited_i = np.argwhere(unvisited)
-        current = tuple(unvisited_i[distance[unvisited].argmin()])
+        if use_heuristics:
+            mod_distance = distance + heuristic_distance
+            current = tuple(unvisited_i[mod_distance[unvisited].argmin()])
+
+        else:
+            current = tuple(unvisited_i[distance[unvisited].argmin()])
 
     return distance[-1, -1]
 
 
 if __name__ == '__main__':
-    lowest = lowest_risk_dijkstra('input.txt')
-    lowest_exp = lowest_risk_dijkstra('input.txt', n_expand=5)
+    lowest = lowest_risk_dijkstra('input.txt', use_heuristics=True)
+    lowest_exp = lowest_risk_dijkstra('input.txt', n_expand=5, use_heuristics=True)
 
     print(f'Lowest total risk: {lowest}')
     print(f'Lowest total risk after expansion: {lowest_exp}')
