@@ -19,69 +19,56 @@ def get_target_area(f):
     return x, y
 
 
-def possible_x_vel(target):
-    x_vel_hit = []
-    x_vel = 1
-    x = 0
-    # increase x-velocity until it overshoots
-    while not x > target[0][1]:
-        x_vel += 1
-        x = np.arange(x_vel+1).sum()
-        if x >= target[0][0]:
-            x_vel_hit.append(x_vel)
-    return x_vel_hit
+def x_vel_range(target):
+    t_x_min, t_x_max = target[0]
+    # maximal velocity: hit target in one step
+    x_vel_max = t_x_max
+
+    # minimal velocity
+    x_vel_min, i = 0, 0
+    while sum(range(i)) < t_x_min:
+        x_vel_min = i
+        i += 1
+
+    return x_vel_min, x_vel_max
 
 
-def hit_target_y(target, initial_x_vel, initial_y_vel):
-    y = 0
-    y_vel = initial_y_vel
+def hit_target(target, initial_x_vel, initial_y_vel):
+    x, y = 0, 0
+    x_vel, y_vel = initial_x_vel, initial_y_vel
 
-    for i in range(initial_x_vel):
+    # step until overshoot
+    while x <= target[0][1] and y >= target[1][0]:
+        if target[0][0] <= x and target[1][1] >= y:
+            return True
+        x += x_vel
         y += y_vel
+        if x_vel > 0:
+            x_vel -= 1
         y_vel -= 1
-
-    while y > target[1][1]:
-        y += y_vel
-        y_vel -= 1
-    if y >= target[1][0]:
-        # in target area
-        return True
-    else:
-        # overshoot
-        return False
+    return False
 
 
-def optimal_y_vel(target, x_vel):
-    y_vel = x_vel
-    last_working = -1
-    while hit_target_y(target, x_vel, y_vel):
-        last_working = y_vel
-        y_vel += 1
-    return last_working
+def find_all(target):
+    x_vel_min, x_vel_max = x_vel_range(target)
+    y_vel_min = target[1][0]
+    vel_hit = []
+    for x_vel in range(x_vel_min, x_vel_max + 1):
+        y_vel_max = x_vel_max
+        for y_vel in range(y_vel_min, y_vel_max + 1):
+            if hit_target(target, x_vel, y_vel):
+                vel_hit.append((x_vel, y_vel))
+    return vel_hit
 
 
-def find_highest(target):
-    x_vel_hit = possible_x_vel(target)
-    x_vel_max, y_vel_max = 0, 0
-    # for x_vel in x_vel_hit:
-    for x_vel in range(target[0][1] + 30):
-        y_vel = optimal_y_vel(target, x_vel)
-        if y_vel < 0:
-            continue
-        print(y_vel)
-        if y_vel > y_vel_max:
-            y_vel_max = y_vel
-            x_vel_max = x_vel
-    return x_vel_max, y_vel_max
-
-
-def highest_point(y_vel):
-    return np.arange(y_vel+1).sum()
+def highest_point(vel_hit):
+    y_vel = [i[1] for i in vel_hit]
+    return np.arange(max(y_vel)+1).sum()
 
 
 if __name__ == '__main__':
-    _, best_y_vel = find_highest(get_target_area('input.txt'))
-    # _, best_y_vel = find_highest(((20, 30), (-10, -5)))
-    highest = highest_point(best_y_vel)
-    print(f'Highest point: {highest}')
+    _all = find_all(get_target_area('input.txt'))
+    highest = highest_point(_all)
 
+    print(f'Highest point: {highest}')
+    print(f'Number of initial velocities: {len(_all)}')
