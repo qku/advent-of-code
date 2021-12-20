@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 def read_input(f):
     numbers = []
     with open(f) as file:
@@ -116,7 +119,22 @@ def magnitude(number):
     return 3 * m_left + 2 * m_right
 
 
+def max_magnitude(numbers):
+    res = 0
+    for a in numbers:
+        for b in numbers:
+            if a == b:
+                continue
+            summands = deepcopy([a, b])
+            _sum = add_numbers(summands)
+            m = magnitude(_sum)
+            res = max(res, m)
+    return res
+
+
 if __name__ == '__main__':
     snail_numbers = read_input('input.txt')
     hw_mag = magnitude(add_numbers(snail_numbers))
+    hw_mag_max = max_magnitude(snail_numbers)
     print(f'Magnitude of result: {hw_mag}')
+    print(f'Maximum magnitude: {hw_mag_max}')

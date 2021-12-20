@@ -46,3 +46,15 @@ def test_sum_magnitude():
     numbers = read_input('test_input.txt')
     _sum = add_numbers(numbers)
     assert magnitude(_sum) == 4140
+
+
+def test_sum_magnitude_2():
+    numbers = [[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]],
+               [[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]]
+    _sum = add_numbers(numbers)
+    assert magnitude(_sum) == 3993
+
+
+def test_max_magnitude():
+    numbers = read_input('test_input.txt')
+    assert max_magnitude(numbers) == 3993
