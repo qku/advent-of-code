@@ -34,12 +34,12 @@ def main(year, day):
     cookies = {'session': session}
 
     # post request
-    url = f'https://adventofcode.com/{year}/day/{day:02}/input'
+    url = f'https://adventofcode.com/{year}/day/{day}/input'
     r = requests.post(url, cookies=cookies)
 
     # create directory if it doesn't exist yet
     root = 'src/advent_of_code'
-    folder = f'{root}/{year}/{day}'
+    folder = f'{root}/{year}/{day:02}'
     Path(folder).mkdir(parents=True, exist_ok=True)
 
     # write input.txt file
