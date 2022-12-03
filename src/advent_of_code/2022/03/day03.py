@@ -9,27 +9,14 @@ def score(c):
         return ord(c) - 96
 
 
-def find_duplicate(a, b):
-    for k in a:
-        if k in b:
-            return k
-
-
-def find_triplicate(a, b, c):
-    for k in a:
-        if k in b and k in c:
-            return k
-
-
 prio = 0
 for i in rucksacks:
     i = i.strip()
     n = len(i)
-    left = i[:len(i)//2]
-    right = i[len(i)//2:]
+    left = set(i[:len(i)//2])
+    right = set(i[len(i)//2:])
 
-    assert len(left) == len(right)
-    duplicate = find_duplicate(left, right)
+    duplicate = (left & right).pop()
     prio += score(duplicate)
 
 print(prio)
@@ -37,10 +24,8 @@ print(prio)
 group_prio = 0
 n = len(rucksacks)
 for i in range(0, n, 3):
-    badge = find_triplicate(
-        rucksacks[i],
-        rucksacks[i+1],
-        rucksacks[i+2])
+    a, b, c = set(rucksacks[i].strip()), set(rucksacks[i+1].strip()), set(rucksacks[i+2].strip())
+    badge = (a & (b & c)).pop()
     group_prio += score(badge)
 
 print(group_prio)
