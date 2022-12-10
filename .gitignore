@@ -4,4 +4,4 @@ __pycache__/
 .idea/
 session
 .python-version
-
+input.txt*
