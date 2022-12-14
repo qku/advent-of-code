@@ -32,11 +32,21 @@ def read_cave_file(_file):
             cave[x[0]:x[1]+1, y[0]:y[1]+1] = 1
 
             start = end
-    return cave, min_x
+    return cave, 500 - min_x
 
 
-def let_sand_fall(cave, min_x):
-    start_x = 500 - min_x
+def pad_cave(cave, start_x):
+    pad_bottom = 2
+    cave = np.pad(cave, [(0, pad_bottom), (0, 0)])
+
+    pad_right = (start_x + cave.shape[0]) - cave.shape[1]
+    pad_left = abs(start_x - cave.shape[0])
+    cave = np.pad(cave, [(0, 0), (pad_left, pad_right)])
+    cave[-1] = 1
+    return cave, cave.shape[1] // 2
+
+
+def let_sand_fall(cave, start_x):
     start_y = 0
     x, y = start_x, start_y
     while True:
@@ -52,6 +62,9 @@ def let_sand_fall(cave, min_x):
                 x, y = b_x, b_y
                 break
         else:
+            if x == start_x and y == start_y:
+                cave[y, x] = 2
+                return cave
             x, y = start_x, start_y
 
 
@@ -63,11 +76,19 @@ def print_cave(cave):
         line = line.replace('1', '❇️')
         line = line.replace('2', '🧽')
         print(line)
+    print()
 
 
 if __name__ == '__main__':
-    c, m = read_cave_file('test_input.txt')
-    c_sand = let_sand_fall(c, m)
+    c, sand_x = read_cave_file('input.txt')
+    c_sand = let_sand_fall(c, sand_x)
     print_cave(c_sand)
     n_sand = np.sum(c_sand == 2)
-    print(f'Number of sand blocks: {n_sand}')
+    print(f'Number of sand blocks: {n_sand}\n')
+
+    c, sand_x = read_cave_file('input.txt')
+    c_pad, sand_x = pad_cave(c, sand_x)
+    c_sand = let_sand_fall(c_pad, sand_x)
+    print_cave(c_sand)
+    n_sand = np.sum(c_sand == 2)
+    print(f'Number of sand blocks with rock bottom: {n_sand}')
