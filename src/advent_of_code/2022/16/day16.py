@@ -84,8 +84,6 @@ def dfs(current, _flow_rate, _path_costs, total_released=0, _closed_valves=None,
     results = []
     for v in _closed_valves:
         rate = _flow_rate[v]
-        if v == current:
-            continue
         # print(v, current)
         travel_minutes = _path_costs[v][current]
         this_minutes = minutes - travel_minutes
@@ -124,3 +122,19 @@ if __name__ == '__main__':
 
     released_pressure = dfs('AA', flow_rate, path_costs)
     print(f'Maximum released pressure: {released_pressure}')
+
+    # part II
+    our_minutes = 26
+    n_valves = len(flow_rate)
+    our_results = []
+    for elephant_share in itertools.combinations(flow_rate, n_valves // 2):
+        elephant_flow_rate = {k: flow_rate[k] for k in elephant_share}
+        my_flow_rate = {k: flow_rate[k] for k, v in flow_rate.items() if k not in elephant_share}
+
+        elephant_released_pressure = dfs('AA', elephant_flow_rate, path_costs, minutes=our_minutes)
+        my_released_pressure = dfs('AA', my_flow_rate, path_costs, minutes=our_minutes)
+
+        our_results.append(elephant_released_pressure + my_released_pressure)
+
+    best_result = max(our_results)
+    print(f'Maximum released pressure with an elephant to help: {best_result}')
