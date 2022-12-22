@@ -1,5 +1,6 @@
 from itertools import cycle
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def read_input(file):
@@ -33,6 +34,29 @@ def measure_height(_cave):
     return _cave.shape[0] - floors_to_crop - 1
 
 
+def find_pattern(_increase):
+    crop = 0
+    while crop < _increase.size:
+        cropped = _increase[crop:]
+        n = 5
+        while n <= cropped.size // 2:
+            candidate = cropped[:n]
+
+            repetitions = 1
+            while n * (repetitions + 1) <= cropped.size:
+                check = cropped[n * repetitions:n * (repetitions + 1)]
+                if np.all(check == candidate):
+                    print(f'Found candidate that repeats {repetitions}x of length {n} after cropping {crop} lines.')
+                else:
+                    break
+                repetitions += 1
+            else:
+                print(f'Found fully repeating pattern of length {n} after cropping {crop} lines.')
+                return crop, candidate
+            n += 1
+        crop += 1
+
+
 if __name__ == '__main__':
     jet_pattern = read_input('input.txt')
     jet_pattern = cycle(jet_pattern)
@@ -57,7 +81,10 @@ if __name__ == '__main__':
     # create just cave floor
     cave = np.ones((1, 9), dtype=int)
 
-    for _ in range(2022):
+    pile_heights = []
+    n_rocks = 9001
+    for _ in range(n_rocks):
+        # print(_ / n)
         rock = next(rocks)
         height, width = rock.shape
 
@@ -84,6 +111,21 @@ if __name__ == '__main__':
 
         top_index = np.argmax(cave.sum(axis=1) > 2)
         cave = cave[top_index:]
+        pile_heights.append(measure_height(cave))
 
     rock_pile_height = measure_height(cave)
-    print(f'Rock pile is {rock_pile_height} high.')
+    print(f'Pile after {n_rocks} rocks is {rock_pile_height} high.')
+    # plt.plot(pile_heights)
+    # plt.show()
+
+    increase = np.diff(pile_heights)
+    lines_to_crop, pattern = find_pattern(increase)
+
+    n_rocks_extreme = 1000000000000
+    crop_pile = pile_heights[lines_to_crop]
+    n_remaining = n_rocks_extreme - lines_to_crop
+    full_reps = n_remaining // pattern.size
+    partial_rep = n_remaining % pattern.size
+
+    extreme_pile_height = crop_pile + full_reps * pattern.sum() + pattern[:partial_rep-1].sum()
+    print(f'Pile after {n_rocks} rocks is {extreme_pile_height} high.')
