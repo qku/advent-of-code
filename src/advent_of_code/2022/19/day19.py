@@ -27,6 +27,7 @@ def read_blueprints(file):
 def dfs(__stock, __robots, _remaining_minutes, _costs, _robot_to_build_next=None):
     _stock = __stock.copy()
     _robots = __robots.copy()
+    global global_max
     if _robot_to_build_next is not None:
         while np.any(_stock - _costs[_robot_to_build_next] < 0) and _remaining_minutes:
             _stock += _robots
@@ -38,27 +39,33 @@ def dfs(__stock, __robots, _remaining_minutes, _costs, _robot_to_build_next=None
             _remaining_minutes -= 1
             _robots[_robot_to_build_next] += 1
         else:
-            return _stock[3]
+            global_max = max(global_max, _stock[3])
+            return
 
     if _remaining_minutes:
         _results = []
-        for robot in [0, 1]:
-            # ore and clay robots are always possible to build
-            if _robots[robot] < max([c[robot] for c in _costs]):
-                _results.append(dfs(_stock, _robots, _remaining_minutes, _costs, _robot_to_build_next=robot))
-        if _robots[1] > 0 and _robots[2] < _costs[3][2]:
-            # there is a clay robot
-            # try for an obsidian robot
-            _results.append(dfs(_stock.copy(), _robots.copy(), _remaining_minutes, _costs, _robot_to_build_next=2))
         if _robots[2] > 0:
             # there is an obsidian robot
             # try for a geode robot
-            _results.append(dfs(_stock.copy(), _robots.copy(), _remaining_minutes, _costs, _robot_to_build_next=3))
+            dfs(_stock.copy(), _robots.copy(), _remaining_minutes, _costs, _robot_to_build_next=3)
+        if _robots[1] > 0 and _robots[2] < _costs[3][2]:
+            # there is a clay robot
+            # try for an obsidian robot
+            turns_to_build = 1 + min(0, abs((_stock - _costs[2]).min()))
+            remaining_turns = _remaining_minutes - turns_to_build
+            upper_bound = remaining_turns * _robots[3] + np.arange(remaining_turns + 1).sum() + _stock[3]
+            if upper_bound > global_max:
+                dfs(_stock.copy(), _robots.copy(), _remaining_minutes, _costs, _robot_to_build_next=2)
+        for robot in [1, 0]:
+            # ore and clay robots are always possible to build
+            if _robots[robot] < max([c[robot] for c in _costs]):
+                turns_to_build = 1 + min(0, abs((_stock - _costs[robot]).min()))
+                remaining_turns = _remaining_minutes - turns_to_build
+                upper_bound = remaining_turns * _robots[3] + np.arange(remaining_turns + 1).sum() + _stock[3]
+                if upper_bound > global_max:
+                    dfs(_stock, _robots, _remaining_minutes, _costs, _robot_to_build_next=robot)
 
-    else:
-        return _stock[3]
-
-    return max(_results)
+    global_max = max(global_max, _stock[3])
 
 
 if __name__ == '__main__':
@@ -66,9 +73,20 @@ if __name__ == '__main__':
 
     results = []
     for costs in blueprints:
-        max_geodes = dfs(np.zeros(4, dtype=int), np.array([1, 0, 0, 0]), 24, costs)
-        print(max_geodes)
-        results.append(max_geodes)
+        global_max = 0
+        dfs(np.zeros(4, dtype=int), np.array([1, 0, 0, 0]), 24, costs)
+        print(global_max)
+        results.append(global_max)
 
     quality_level = sum([(i + 1) * max_geodes for i, max_geodes in enumerate(results)])
     print(f'Quality level of best blueprint: {quality_level}')
+
+    # part II
+    product = 1
+    for costs in blueprints[:3]:
+        global_max = 0
+        dfs(np.zeros(4, dtype=int), np.array([1, 0, 0, 0]), 32, costs)
+        print(global_max)
+        product *= global_max
+
+    print(f'Product of first three blueprints: {product}')
