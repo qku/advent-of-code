@@ -5,4 +5,4 @@ __pycache__/
 session
 .python-version
 input.txt*
-test_input.txt*
+test_input*.txt*
