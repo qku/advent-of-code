@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import shutil
 
 import click
 import requests
@@ -45,3 +46,10 @@ def main(year, day):
     # write input.txt file
     with open(folder + '/input.txt', 'w') as f:
         f.write(r.text)
+
+    # copy over templates
+    shutil.copy(f'{root}/template/day00.py', f'{folder}/day{day:02}.py')
+    shutil.copy(f'{root}/template/test_day00.py', f'{folder}/test_day{day:02}.py')
+
+    # create empty test input file
+    open(folder + '/test_input.txt', 'a').close()
